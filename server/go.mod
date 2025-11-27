@@ -4,6 +4,7 @@ go 1.24.4
 
 require (
 	github.com/gin-gonic/gin v1.9.1
+	github.com/gorilla/websocket v1.5.1
 	k8s.io/api v0.28.4
 	k8s.io/apimachinery v0.28.4
 	k8s.io/client-go v0.28.4

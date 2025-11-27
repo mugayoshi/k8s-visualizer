@@ -2,11 +2,13 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mugayoshi/k8s-visualizer/server/internal/handlers"
 	"github.com/mugayoshi/k8s-visualizer/server/internal/middleware"
+	"github.com/mugayoshi/k8s-visualizer/server/internal/pkg/config"
 	"github.com/mugayoshi/k8s-visualizer/server/internal/services"
 )
 
@@ -16,14 +18,22 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create K8s client: %v", err)
 	}
+	// Load configuration
+	cfg := config.Load()
+	cfg.Print()
+
+	// Set Gin mode
+	gin.SetMode(cfg.Server.Mode)
 
 	// Create Gin router
 	r := gin.Default()
 
 	// Middleware
 	r.Use(middleware.CORS())
-	// TODO
-	// r.Use(middleware.Logger())
+	r.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		SkipPaths: []string{"/health"},
+	}))
+	r.Use(gin.Recovery())
 
 	// Health check
 	r.GET("/health", func(c *gin.Context) {
@@ -36,6 +46,16 @@ func main() {
 	// API routes
 	api := r.Group("/api")
 	{
+		// Metrics endpoint
+		api.GET("/metrics", func(c *gin.Context) {
+			ctx := context.Background()
+			metrics, err := k8sClient.GetClusterMetrics(ctx)
+			if err != nil {
+				c.JSON(500, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(200, metrics)
+		})
 		// Node endpoints
 		nodeHandler := handlers.NewNodeHandler(k8sClient)
 		api.GET("/nodes", nodeHandler.ListNodes)
@@ -57,8 +77,8 @@ func main() {
 
 		// TODO
 		// WebSocket endpoint
-		// wsHandler := handlers.NewWebSocketHandler(k8sClient)
-		// api.GET("/ws", wsHandler.HandleWebSocket)
+		wsHandler := handlers.NewWebSocketHandler(k8sClient)
+		api.GET("/ws", wsHandler.HandleWebSocket)
 	}
 
 	// Start server
