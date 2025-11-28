@@ -30,6 +30,10 @@ These instructions will get you a copy of the project up and running on your loc
     git config core.hooksPath frontend/.husky
     ```
     This will ensure that tests are run before each commit.
+5. Install Playwright for the frontend tests.
+    ```sh
+    yarn install Playwright
+    ```
 
 ## Available Scripts
 
