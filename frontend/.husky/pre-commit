@@ -1,0 +1,5 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+yarn test:unit || exit 1
+cd ../server && go test ./... || exit 1
