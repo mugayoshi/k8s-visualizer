@@ -77,3 +77,9 @@ class ApiClient {
 export const apiClient = new ApiClient(
   import.meta.env.VITE_API_URL || 'http://localhost:8080'
 );
+
+// Reusable fetchPods function for use in Svelte pages
+export async function fetchPods(namespace: string = 'all'): Promise<Pod[]> {
+  const response = await apiClient.listPods(namespace);
+  return response.pods;
+}
