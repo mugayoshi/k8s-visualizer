@@ -77,6 +77,15 @@
         }
     }
 
+    function statusClass(status: string) {
+        const s = (status || '').toLowerCase();
+        if (s.includes('running')) return 'status-running';
+        if (s.includes('pending')) return 'status-pending';
+        if (s.includes('failed')) return 'status-failed';
+        if (s.includes('succeeded') || s.includes('completed') || s.includes('success')) return 'status-succeeded';
+        return 'status-unknown';
+    }
+
     onMount(() => {
         connect();
         return () => {
@@ -102,8 +111,14 @@
                     <th>Name</th>
                     <th>Namespace</th>
                     <th>Status</th>
-                    <th>Ready</th>
+                    <!-- <th>Ready Containers</th> -->
                     <th>Restarts</th>
+                    <th>Age</th>
+                    <th>Containers</th>
+                    <th>CPU Request</th>
+                    <th>CPU Limit</th>
+                    <th>Memory Request</th>
+                    <th>Memory Limit</th>
                 </tr>
             </thead>
             <tbody>
@@ -111,9 +126,22 @@
                     <tr>
                         <td>{pod.name}</td>
                         <td>{pod.namespace}</td>
-                        <td>{pod.phase}</td>
-                        <td>{pod.containers?.[0]?.ready || false}</td>
-                        <td>{pod.containers?.[0]?.restart_count || 0}</td>
+                        <td>
+                            <span class="status-badge {statusClass(pod.status)}" title={pod.status_detail ? `${pod.status_detail} · ${pod.ready_containers || ''}` : (pod.ready_containers || pod.status)}>
+                                {pod.status}
+                            </span>
+                            {#if pod.status_detail}
+                                <small>{pod.status_detail}</small>
+                            {/if}
+                        </td>
+                        <!-- <td>{pod.ready_containers || '-'}</td> -->
+                        <td>{pod.restart_count || 0}</td>
+                        <td>{pod.age || '-'}</td>
+                        <td>{pod.container_count || '-'}</td>
+                        <td>{pod.cpu_request || '-'}</td>
+                        <td>{pod.cpu_limit || '-'}</td>
+                        <td>{pod.memory_request || '-'}</td>
+                        <td>{pod.memory_limit || '-'}</td>
                     </tr>
                 {/each}
             </tbody>
@@ -150,4 +178,19 @@
     .error {
         color: red;
     }
+
+    /* Status badges */
+    .status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.85em;
+    }
+    .status-running { background: #16a34a; }
+    .status-pending { background: #f59e0b; }
+    .status-failed { background: #ef4444; }
+    .status-succeeded { background: #6b7280; }
+    .status-unknown { background: #7c3aed; }
 </style>

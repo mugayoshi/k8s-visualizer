@@ -179,12 +179,36 @@ func (h *WebSocketHandler) watchPods(ctx context.Context, send chan models.WebSo
 	if err == nil {
 		result := make([]map[string]interface{}, 0, len(pods.Items))
 		for _, pod := range pods.Items {
-			result = append(result, map[string]interface{}{
+			// Get metrics for the pod
+			metrics, err := h.k8sClient.GetPodMetrics(ctx, pod.Namespace, pod.Name)
+			podData := map[string]interface{}{
 				"name":      pod.Name,
 				"namespace": pod.Namespace,
 				"status":    string(pod.Status.Phase),
 				"node":      pod.Spec.NodeName,
-			})
+			}
+
+			if err == nil {
+				if metrics.CPURequest != "" {
+					podData["cpu_request"] = metrics.CPURequest
+				}
+				if metrics.CPULimit != "" {
+					podData["cpu_limit"] = metrics.CPULimit
+				}
+				if metrics.MemoryRequest != "" {
+					podData["memory_request"] = metrics.MemoryRequest
+				}
+				if metrics.MemoryLimit != "" {
+					podData["memory_limit"] = metrics.MemoryLimit
+				}
+				if metrics.Age != "" {
+					podData["age"] = metrics.Age
+				}
+				podData["container_count"] = metrics.ContainerCount
+				podData["restart_count"] = metrics.RestartCount
+			}
+
+			result = append(result, podData)
 		}
 
 		send <- models.WebSocketMessage{
@@ -230,11 +254,36 @@ func (h *WebSocketHandler) watchPods(ctx context.Context, send chan models.WebSo
 			status := podData["status"].(map[string]interface{})
 			spec := podData["spec"].(map[string]interface{})
 
+			// Get metrics for the pod
+			podNamespace := metadata["namespace"].(string)
+			podName := metadata["name"].(string)
+			metrics, err := h.k8sClient.GetPodMetrics(ctx, podNamespace, podName)
+
 			simplifiedPod := map[string]interface{}{
 				"name":      metadata["name"],
 				"namespace": metadata["namespace"],
 				"status":    status["phase"],
 				"node":      spec["nodeName"],
+			}
+
+			if err == nil {
+				if metrics.CPURequest != "" {
+					simplifiedPod["cpu_request"] = metrics.CPURequest
+				}
+				if metrics.CPULimit != "" {
+					simplifiedPod["cpu_limit"] = metrics.CPULimit
+				}
+				if metrics.MemoryRequest != "" {
+					simplifiedPod["memory_request"] = metrics.MemoryRequest
+				}
+				if metrics.MemoryLimit != "" {
+					simplifiedPod["memory_limit"] = metrics.MemoryLimit
+				}
+				if metrics.Age != "" {
+					simplifiedPod["age"] = metrics.Age
+				}
+				simplifiedPod["container_count"] = metrics.ContainerCount
+				simplifiedPod["restart_count"] = metrics.RestartCount
 			}
 
 			// Determine event type

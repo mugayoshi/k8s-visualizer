@@ -25,15 +25,19 @@ type NodeAddress struct {
 
 // PodResponse represents a simplified pod response
 type PodResponse struct {
-	Name         string            `json:"name"`
-	Namespace    string            `json:"namespace"`
-	Status       string            `json:"status"`
-	Phase        string            `json:"phase"`
-	Node         string            `json:"node"`
-	Created      time.Time         `json:"created"`
-	Labels       map[string]string `json:"labels"`
-	Containers   []ContainerInfo   `json:"containers"`
-	RestartCount int32             `json:"restart_count"`
+	Name            string            `json:"name"`
+	Namespace       string            `json:"namespace"`
+	Status          string            `json:"status"`
+	StatusDetail    string            `json:"status_detail,omitempty"`
+	Phase           string            `json:"phase"`
+	ReadyContainers string            `json:"ready_containers"`
+	Node            string            `json:"node"`
+	Created         time.Time         `json:"created"`
+	Labels          map[string]string `json:"labels"`
+	Containers      []ContainerInfo   `json:"containers"`
+	RestartCount    int32             `json:"restart_count"`
+	CPUUsage        string            `json:"cpu_usage,omitempty"`
+	MemoryUsage     string            `json:"memory_usage,omitempty"`
 }
 
 // ContainerInfo represents container information

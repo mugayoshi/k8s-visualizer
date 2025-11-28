@@ -27,12 +27,20 @@ export interface Pod {
   name: string;
   namespace: string;
   status: string;
+  status_detail?: string;
+  ready_containers?: string;
   phase?: string;
   node: string;
   created: string;
   labels: Record<string, string>;
   containers: Container[];
   restart_count?: number;
+  cpu_request?: string;
+  cpu_limit?: string;
+  memory_request?: string;
+  memory_limit?: string;
+  container_count?: number;
+  age?: string;
 }
 
 export interface Namespace {
