@@ -1,38 +1,70 @@
-# sv
+# K8s Visualizer Frontend
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+This is the frontend for the K8s Visualizer application, built with SvelteKit and Vite.
 
-## Creating a project
+## Getting Started
 
-If you're seeing this, you've probably already done this step. Congrats!
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-```sh
-# create a new project in the current directory
-npx sv create
+### Prerequisites
 
-# create a new project in my-app
-npx sv create my-app
-```
+*   [Node.js](https://nodejs.org/) (v18 or newer)
+*   [Yarn](https://classic.yarnpkg.com/)
 
-## Developing
+### Installation
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+1.  Clone the repo:
+    ```sh
+    git clone https://github.com/mugayoshi/k8s-visualizer.git
+    ```
+2.  Navigate to the frontend directory:
+    ```sh
+    cd k8s-visualizer/frontend
+    ```
+3.  Install the dependencies:
+    ```sh
+    yarn install
+    ```
+4.  After installation, a pre-commit hook will be set up to run tests before each commit.
 
-```sh
-npm run dev
+## Available Scripts
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+In the project directory, you can run:
 
-## Building
+### `yarn dev`
 
-To create a production version of your app:
+Runs the app in development mode.
+Open [http://localhost:5173](http://localhost:5173) to view it in your browser.
 
-```sh
-npm run build
-```
+The page will reload when you make changes.
+You may also see any lint errors in the console.
 
-You can preview the production build with `npm run preview`.
+### `yarn build`
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Builds the app for production to the `.svelte-kit` directory.
+It correctly bundles the app in production mode and optimizes the build for the best performance.
+
+### `yarn preview`
+
+Runs a local server to preview the production build.
+
+### `yarn test`
+
+Runs all tests once. This is also used by the pre-commit hook.
+
+### `yarn test:unit`
+
+Launches the test runner in interactive watch mode.
+
+### `yarn lint`
+
+Lints the project files for any code quality issues.
+
+### `yarn format`
+
+Formats all project files with Prettier.
+
+### `yarn storybook`
+
+Runs Storybook, a tool for UI development.
+Open [http://localhost:6006](http://localhost:6006) to view it in your browser.
