@@ -11,10 +11,10 @@ import (
 )
 
 type NamespaceHandler struct {
-	k8sClient *services.K8sClient
+	k8sClient services.K8sClientInterface
 }
 
-func NewNamespaceHandler(k8sClient *services.K8sClient) *NamespaceHandler {
+func NewNamespaceHandler(k8sClient services.K8sClientInterface) *NamespaceHandler {
 	return &NamespaceHandler{k8sClient: k8sClient}
 }
 

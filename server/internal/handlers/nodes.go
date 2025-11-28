@@ -11,10 +11,10 @@ import (
 )
 
 type NodeHandler struct {
-	k8sClient *services.K8sClient
+	k8sClient services.K8sClientInterface
 }
 
-func NewNodeHandler(k8sClient *services.K8sClient) *NodeHandler {
+func NewNodeHandler(k8sClient services.K8sClientInterface) *NodeHandler {
 	return &NodeHandler{k8sClient: k8sClient}
 }
 

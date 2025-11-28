@@ -27,10 +27,10 @@ var upgrader = websocket.Upgrader{
 }
 
 type WebSocketHandler struct {
-	k8sClient *services.K8sClient
+	k8sClient services.K8sClientInterface
 }
 
-func NewWebSocketHandler(k8sClient *services.K8sClient) *WebSocketHandler {
+func NewWebSocketHandler(k8sClient services.K8sClientInterface) *WebSocketHandler {
 	return &WebSocketHandler{k8sClient: k8sClient}
 }
 

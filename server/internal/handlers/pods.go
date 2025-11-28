@@ -13,10 +13,10 @@ import (
 )
 
 type PodHandler struct {
-	k8sClient *services.K8sClient
+	k8sClient services.K8sClientInterface
 }
 
-func NewPodHandler(k8sClient *services.K8sClient) *PodHandler {
+func NewPodHandler(k8sClient services.K8sClientInterface) *PodHandler {
 	return &PodHandler{k8sClient: k8sClient}
 }
 
@@ -96,8 +96,6 @@ func (h *PodHandler) GetPodLogs(c *gin.Context) {
 	container := c.DefaultQuery("container", "")
 	tailLines := int64(100)
 
-	clientset := h.k8sClient.GetClientset()
-
 	opts := &corev1.PodLogOptions{
 		TailLines: &tailLines,
 	}
@@ -105,8 +103,7 @@ func (h *PodHandler) GetPodLogs(c *gin.Context) {
 		opts.Container = container
 	}
 
-	req := clientset.CoreV1().Pods(namespace).GetLogs(name, opts)
-	logStream, err := req.Stream(ctx)
+	logStream, err := h.k8sClient.GetPodLogs(ctx, namespace, name, opts)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

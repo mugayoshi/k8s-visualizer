@@ -11,10 +11,10 @@ import (
 )
 
 type DeploymentHandler struct {
-	k8sClient *services.K8sClient
+	k8sClient services.K8sClientInterface
 }
 
-func NewDeploymentHandler(k8sClient *services.K8sClient) *DeploymentHandler {
+func NewDeploymentHandler(k8sClient services.K8sClientInterface) *DeploymentHandler {
 	return &DeploymentHandler{k8sClient: k8sClient}
 }
 
