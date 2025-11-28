@@ -25,7 +25,11 @@ These instructions will get you a copy of the project up and running on your loc
     ```sh
     yarn install
     ```
-4.  After installation, a pre-commit hook will be set up to run tests before each commit.
+4.  Enable the pre-commit hook:
+    ```sh
+    git config core.hooksPath frontend/.husky
+    ```
+    This will ensure that tests are run before each commit.
 
 ## Available Scripts
 
