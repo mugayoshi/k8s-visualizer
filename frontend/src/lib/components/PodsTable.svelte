@@ -5,7 +5,7 @@
   export let loading: boolean = false;
   export let error: string | null = null;
 
-  function statusClass(status: string) {
+  function statusClass(status: string): string {
     const s = (status || '').toLowerCase();
     if (s.includes('running')) return 'status-running';
     if (s.includes('pending')) return 'status-pending';
@@ -39,9 +39,9 @@
         </tr>
       </thead>
       <tbody>
-        {#each pods as pod (pod.name)}
+        {#each pods as pod (pod.namespace + '/' + pod.name)}
           <tr>
-            <td>{pod.name}</td>
+            <td><a href={`/pods/${pod.name}?namespace=${pod.namespace}`}>{pod.name}</a></td>
             <td>{pod.namespace}</td>
             <td>
               <span class="status-badge {statusClass(pod.status)}" title={pod.status_detail ? `${pod.status_detail} · ${pod.ready_containers || ''}` : (pod.ready_containers || pod.status)}>

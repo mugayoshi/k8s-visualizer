@@ -76,6 +76,86 @@ export interface ClusterMetrics {
   }>;
 }
 
+export interface KubernetesPod {
+  apiVersion: string;
+  kind: string;
+  metadata: {
+    name: string;
+    namespace: string;
+    uid: string;
+    resourceVersion: string;
+    creationTimestamp: string;
+    labels?: Record<string, string>;
+    ownerReferences?: Array<{
+      apiVersion: string;
+      kind: string;
+      name: string;
+      uid: string;
+    }>;
+  };
+  spec: {
+    containers: Array<{
+      name: string;
+      image: string;
+      imagePullPolicy?: string;
+      resources?: {
+        requests?: Record<string, string>;
+        limits?: Record<string, string>;
+      };
+      ports?: Array<{
+        name?: string;
+        containerPort: number;
+        protocol?: string;
+      }>;
+      env?: Array<{
+        name: string;
+        value?: string;
+        valueFrom?: any;
+      }>;
+      volumeMounts?: Array<{
+        name: string;
+        mountPath: string;
+        readOnly?: boolean;
+      }>;
+    }>;
+    restartPolicy?: string;
+    terminationGracePeriodSeconds?: number;
+    dnsPolicy?: string;
+    nodeName?: string;
+    serviceAccountName?: string;
+    initContainers?: Array<any>;
+    volumes?: Array<any>;
+  };
+  status: {
+    phase?: string;
+    conditions?: Array<{
+      type: string;
+      status: string;
+      lastProbeTime?: string;
+      lastTransitionTime?: string;
+      reason?: string;
+      message?: string;
+    }>;
+    containerStatuses?: Array<{
+      name: string;
+      ready: boolean;
+      restartCount: number;
+      image: string;
+      imageID: string;
+      containerID?: string;
+      state?: {
+        running?: { startedAt: string };
+        waiting?: { reason: string; message?: string };
+        terminated?: any;
+      };
+      lastState?: any;
+    }>;
+    startTime?: string;
+    hostIP?: string;
+    podIP?: string;
+  };
+}
+
 export interface WebSocketMessage {
   type: string;
   action: string;
