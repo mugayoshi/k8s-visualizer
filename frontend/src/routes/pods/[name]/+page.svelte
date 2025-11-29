@@ -1,13 +1,44 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import type { KubernetesPod } from '$lib/types/kubernetes';
+  import { apiClient } from '$lib/api/client';
   export let data: { pod: KubernetesPod | null; error?: string };
 
-  const { pod, error } = data;
+  const refreshInterval = 10 * 1000; // 10 seconds
+
+  let pod = data.pod;
+  let error: string | null = data.error || null;
+  let lastFetched: string | null = pod ? new Date().toISOString() : null;
   let showRawJSON = false;
   let showLogs = false;
   let logs = '';
   let logsLoading = false;
   let logsError: string | null = null;
+  let refreshIntervalId: number | null = null;
+  let isRefreshing = false;
+
+  async function refreshPodData() {
+    if (!pod) return;
+    isRefreshing = true;
+    try {
+      const namespace = pod.metadata?.namespace || 'default';
+      const name = pod.metadata?.name;
+      pod = (await apiClient.getPod(namespace, name)) as unknown as KubernetesPod;
+      error = null;
+      lastFetched = new Date().toISOString();
+    } catch (err) {
+      error = (err as Error)?.message || 'Failed to refresh pod';
+    } finally {
+      isRefreshing = false;
+    }
+  }
+
+  onMount(() => {
+    refreshIntervalId = window.setInterval(refreshPodData, refreshInterval);
+    return () => {
+      if (refreshIntervalId) clearInterval(refreshIntervalId);
+    };
+  });
 
   async function fetchLogs() {
     if (logs) return; // Already fetched
@@ -15,13 +46,9 @@
     logsError = null;
     try {
       const namespace = pod?.metadata?.namespace || 'default';
-      const name = pod?.metadata?.name;
-      const response = await fetch(`http://localhost:8080/api/pods/${namespace}/${name}/logs`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch logs: ${response.statusText}`);
-      }
-      const data = await response.json();
-      logs = data.logs || '';
+      const name = pod?.metadata?.name || '';
+      const response = await apiClient.getPodLogs(namespace, name);
+      logs = response.logs || '';
     } catch (err) {
       logsError = (err as Error)?.message || 'Failed to load logs';
     } finally {
@@ -55,6 +82,12 @@
     <div class="header">
       <a href="/pods" class="back-btn">← Back to Pods</a>
       <h1>Pod: {pod.metadata?.name}</h1>
+      <div>
+        <div class="refresh-status" class:refreshing={isRefreshing}>
+          {isRefreshing ? '⟳ Refreshing...' : `✓ Auto-refresh every ${refreshInterval / 1000}s`}
+        </div>
+        <div class="last-fetched">Last fetched: {lastFetched ? new Date(lastFetched).toLocaleString() : '-'}</div>
+      </div>
     </div>
 
     <div class="meta">
@@ -122,6 +155,9 @@
   .header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
   .back-btn { display: inline-block; padding: 0.5rem 1rem; background: #e5e7eb; color: #1f2937; text-decoration: none; border-radius: 4px; font-weight: 600; transition: background 0.2s; }
   .back-btn:hover { background: #d1d5db; }
+  .refresh-status { font-size: 0.875rem; color: #6b7280; padding: 0.5rem 1rem; background: #f3f4f6; border-radius: 4px; }
+  .refresh-status.refreshing { color: #0066cc; font-weight: 600; animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
   .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem; margin-bottom: 1rem; }
   .labels { list-style: none; padding: 0; display: flex; gap: 0.5rem; flex-wrap: wrap; }
   .labels li { background:#f3f4f6; padding:0.25rem 0.5rem; border-radius:4px; }
