@@ -23,9 +23,14 @@
     component: PodHeader,
     tags: ['autodocs'],
     argTypes: {
-      pod: { control: 'object' }
+      pod: { control: 'object' },
+      lastFetched: { control: 'text' },
+      isRefreshing: { control: 'boolean' },
+      refreshIntervalSeconds: { control: 'number' }
     }
   });
 </script>
 
-<Story name="Default" args={{ pod: samplePod }} />
+<Story name="Default" args={{ pod: samplePod, lastFetched: '2025-11-29T10:15:00Z', isRefreshing: false, refreshIntervalSeconds: 10 }} />
+
+<Story name="Refreshing" args={{ pod: samplePod, lastFetched: '2025-11-29T10:15:00Z', isRefreshing: true, refreshIntervalSeconds: 10 }} />

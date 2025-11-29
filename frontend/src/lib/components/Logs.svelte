@@ -1,32 +1,14 @@
 <script lang="ts">
-  import { apiClient } from '$lib/api/client';
-  import type { KubernetesPod } from '$lib/types/kubernetes';
-  export let pod: KubernetesPod;
+  // Logs are provided by the parent component/page via props.
+  // This component no longer performs network requests.
+  export let logs: string = '';
+  export let loading: boolean = false;
+  export let error: string | null = null;
 
   let showLogs = false;
-  let logs = '';
-  let logsLoading = false;
-  let logsError: string | null = null;
-
-  async function fetchLogs() {
-    if (logs) return;
-    logsLoading = true;
-    logsError = null;
-    try {
-      const namespace = pod?.metadata?.namespace || 'default';
-      const name = pod?.metadata?.name || '';
-      const resp = await apiClient.getPodLogs(namespace, name);
-      logs = resp.logs || '';
-    } catch (err) {
-      logsError = (err as Error)?.message || 'Failed to load logs';
-    } finally {
-      logsLoading = false;
-    }
-  }
 
   function toggleLogs() {
     showLogs = !showLogs;
-    if (showLogs && !logs && !logsError) fetchLogs();
   }
 </script>
 
@@ -34,10 +16,10 @@
   <h2>Logs</h2>
   <button on:click={toggleLogs} class="toggle-btn">{showLogs ? '▼' : '▶'} {showLogs ? 'Hide' : 'Show'} Logs</button>
   {#if showLogs}
-    {#if logsLoading}
+    {#if loading}
       <p>Loading logs...</p>
-    {:else if logsError}
-      <p class="error">Error: {logsError}</p>
+    {:else if error}
+      <p class="error">Error: {error}</p>
     {:else if logs}
       <pre class="logs">{logs}</pre>
     {:else}

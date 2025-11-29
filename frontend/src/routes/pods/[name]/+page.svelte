@@ -17,6 +17,9 @@
   let lastFetched: string | null = pod ? new Date().toISOString() : null;
   let refreshIntervalId: number | null = null;
   let isRefreshing = false;
+  let logs: string = '';
+  let logsLoading: boolean = false;
+  let logsError: string | null = null;
 
   async function refreshPodData() {
     if (!pod) return;
@@ -27,6 +30,8 @@
       pod = (await apiClient.getPod(namespace, name)) as unknown as KubernetesPod;
       error = null;
       lastFetched = new Date().toISOString();
+      // refresh logs for the pod when we refresh pod data
+      fetchLogs();
     } catch (err) {
       error = (err as Error)?.message || 'Failed to refresh pod';
     } finally {
@@ -36,10 +41,34 @@
 
   onMount(() => {
     refreshIntervalId = window.setInterval(refreshPodData, refreshInterval);
+    // fetch logs initially if pod is present
+    if (pod) fetchLogs();
     return () => {
       if (refreshIntervalId) clearInterval(refreshIntervalId);
     };
   });
+
+  async function fetchLogs() {
+    if (!pod) {
+      logs = '';
+      logsError = null;
+      logsLoading = false;
+      return;
+    }
+    logsLoading = true;
+    logsError = null;
+    try {
+      const namespace = pod.metadata?.namespace || 'default';
+      const name = pod.metadata?.name || '';
+      const resp = await apiClient.getPodLogs(namespace, name);
+      logs = resp.logs || '';
+    } catch (err) {
+      logsError = (err as Error)?.message || 'Failed to load logs';
+      logs = '';
+    } finally {
+      logsLoading = false;
+    }
+  }
 </script>
 
 <div class="container">
@@ -58,7 +87,7 @@
     <ContainersTable containers={pod.spec?.containers || []} containerStatuses={pod.status?.containerStatuses || []} />
 
     <RawJson {pod} />
-    <Logs {pod} />
+    <Logs logs={logs} loading={logsLoading} error={logsError} />
   {/if}
 </div>
 

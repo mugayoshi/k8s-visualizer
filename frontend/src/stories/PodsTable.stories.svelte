@@ -42,7 +42,7 @@
   ];
 
   const { Story } = defineMeta({
-    title: 'Kubernetes/PodsTable',
+    title: 'components/PodsTable',
     component: PodsTable,
     tags: ['autodocs'],
     argTypes: {
