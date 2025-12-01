@@ -8,7 +8,7 @@
   let messages: WebSocketMessage[] = [];
   let connectionStatus = 'Disconnected';
   let statusColor = 'bg-red-500';
-  let wsUrl = 'ws://localhost:8080/api/ws';
+  let wsUrl = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:8080/api/ws';
   let messageToSend = '';
   let selectedAction = 'subscribe_pods';
   let selectedNamespace = '';

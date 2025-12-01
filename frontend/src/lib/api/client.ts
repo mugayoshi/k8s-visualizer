@@ -5,7 +5,7 @@ import type { Node, Pod, Namespace, Deployment, ClusterMetrics } from '$lib/type
 class ApiClient {
   private client: AxiosInstance;
 
-  constructor(baseURL: string = 'http://localhost:8080') {
+  constructor(baseURL: string = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080') {
     this.client = axios.create({
       baseURL,
       timeout: 10000,
@@ -75,7 +75,7 @@ class ApiClient {
 
 // Export a singleton instance
 export const apiClient = new ApiClient(
-  import.meta.env.VITE_API_URL || 'http://localhost:8080'
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 );
 
 // Reusable fetchPods function for use in Svelte pages

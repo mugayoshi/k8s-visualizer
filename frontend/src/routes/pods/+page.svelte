@@ -10,7 +10,7 @@
     let error: string | null = null;
     let ws: WebSocket | null = null;
     let connected = false;
-    let wsUrl = 'ws://localhost:8080/api/ws';
+    let wsUrl = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:8080/api/ws';
     let autoReconnect = true;
     let reconnectAttempts = 0;
     let maxReconnectAttempts = 5;

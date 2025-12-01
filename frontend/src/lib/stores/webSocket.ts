@@ -11,7 +11,7 @@ class WebSocketClient {
   private maxReconnectAttempts = 5;
   private reconnectDelay = 3000;
 
-  connect(url: string = 'ws://localhost:8080/api/ws') {
+  connect(url: string = import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:8080/api/ws') {
     try {
       this.ws = new WebSocket(url);
 

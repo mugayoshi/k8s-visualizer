@@ -4,8 +4,10 @@ package services
 import (
 	"context"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,6 +52,23 @@ func NewK8sClient() (*K8sClient, error) {
 		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 		if err != nil {
 			return nil, err
+		}
+
+		// If running in Docker, replace localhost with host.docker.internal
+		if os.Getenv("RUNNING_IN_DOCKER") == "true" {
+			u, err := url.Parse(config.Host)
+			if err == nil {
+				originalHost := u.Host
+				if strings.HasPrefix(originalHost, "127.0.0.1") || strings.HasPrefix(originalHost, "localhost") {
+					// The address to connect to
+					u.Host = strings.Replace(originalHost, "127.0.0.1", "host.docker.internal", 1)
+					u.Host = strings.Replace(u.Host, "localhost", "host.docker.internal", 1)
+					config.Host = u.String()
+
+					// The server name to use for TLS verification
+					config.TLSClientConfig.ServerName = strings.Split(originalHost, ":")[0]
+				}
+			}
 		}
 	}
 

@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_HOST=backend # This will make the frontend connect to the backend service
+  backend:
+    build:
+      context: ./server
+    ports:
+      - "8080:8080"
+    environment:
+      - RUNNING_IN_DOCKER=true
+    volumes:
+      - ~/.kube:/root/.kube:ro
+      - ~/.minikube:${HOME}/.minikube:ro
