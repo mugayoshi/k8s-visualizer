@@ -2,7 +2,7 @@
 package handlers
 
 import (
-	"context"
+
 	"io"
 	"net/http"
 
@@ -21,7 +21,7 @@ func NewPodHandler(k8sClient services.K8sClientInterface) *PodHandler {
 }
 
 func (h *PodHandler) ListPods(c *gin.Context) {
-	ctx := context.Background()
+	ctx := c.Request.Context()
 	namespace := c.DefaultQuery("namespace", "default")
 	clientset := h.k8sClient.GetClientset()
 
@@ -75,7 +75,7 @@ func (h *PodHandler) ListPods(c *gin.Context) {
 }
 
 func (h *PodHandler) GetPod(c *gin.Context) {
-	ctx := context.Background()
+	ctx := c.Request.Context()
 	namespace := c.Param("namespace")
 	name := c.Param("name")
 	clientset := h.k8sClient.GetClientset()
@@ -90,7 +90,7 @@ func (h *PodHandler) GetPod(c *gin.Context) {
 }
 
 func (h *PodHandler) GetPodLogs(c *gin.Context) {
-	ctx := context.Background()
+	ctx := c.Request.Context()
 	namespace := c.Param("namespace")
 	name := c.Param("name")
 	container := c.DefaultQuery("container", "")

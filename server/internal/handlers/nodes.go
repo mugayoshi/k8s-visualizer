@@ -2,7 +2,7 @@
 package handlers
 
 import (
-	"context"
+
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +19,7 @@ func NewNodeHandler(k8sClient services.K8sClientInterface) *NodeHandler {
 }
 
 func (h *NodeHandler) ListNodes(c *gin.Context) {
-	ctx := context.Background()
+	ctx := c.Request.Context()
 	clientset := h.k8sClient.GetClientset()
 
 	nodes, err := clientset.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
@@ -61,7 +61,7 @@ func (h *NodeHandler) ListNodes(c *gin.Context) {
 }
 
 func (h *NodeHandler) GetNode(c *gin.Context) {
-	ctx := context.Background()
+	ctx := c.Request.Context()
 	nodeName := c.Param("name")
 	clientset := h.k8sClient.GetClientset()
 

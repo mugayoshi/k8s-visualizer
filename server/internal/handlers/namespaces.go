@@ -2,7 +2,7 @@
 package handlers
 
 import (
-	"context"
+
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +19,7 @@ func NewNamespaceHandler(k8sClient services.K8sClientInterface) *NamespaceHandle
 }
 
 func (h *NamespaceHandler) ListNamespaces(c *gin.Context) {
-	ctx := context.Background()
+	ctx := c.Request.Context()
 	clientset := h.k8sClient.GetClientset()
 
 	namespaces, err := clientset.CoreV1().Namespaces().List(ctx, metav1.ListOptions{})

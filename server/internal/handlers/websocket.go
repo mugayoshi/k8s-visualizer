@@ -47,17 +47,17 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 	log.Printf("WebSocket client connected from %s", conn.RemoteAddr())
 
 	// Create context with cancel
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(c.Request.Context())
 	defer cancel()
 
 	// Channel for sending messages to client
 	send := make(chan models.WebSocketMessage, 256)
 
 	// Start goroutine to write messages to WebSocket
-	go h.writeMessages(conn, send, cancel)
+	go h.writeMessages(conn, ctx, send, cancel)
 
 	// Start goroutine to read messages from WebSocket
-	go h.readMessages(conn, send, cancel)
+	go h.readMessages(conn, ctx, send, cancel)
 
 	// Start watching Kubernetes resources
 	go h.watchPods(ctx, send, "")
@@ -68,12 +68,16 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 }
 
 // writeMessages writes messages from the send channel to the WebSocket
-func (h *WebSocketHandler) writeMessages(conn *websocket.Conn, send chan models.WebSocketMessage, cancel context.CancelFunc) {
+func (h *WebSocketHandler) writeMessages(conn *websocket.Conn, ctx context.Context, send chan models.WebSocketMessage, cancel context.CancelFunc) {
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
 
 	for {
 		select {
+		case <-ctx.Done():
+			log.Printf("writeMessages goroutine stopped due to context cancellation")
+			return
+
 		case message, ok := <-send:
 			if !ok {
 				conn.WriteMessage(websocket.CloseMessage, []byte{})
@@ -100,7 +104,7 @@ func (h *WebSocketHandler) writeMessages(conn *websocket.Conn, send chan models.
 }
 
 // readMessages reads messages from the WebSocket
-func (h *WebSocketHandler) readMessages(conn *websocket.Conn, send chan models.WebSocketMessage, cancel context.CancelFunc) {
+func (h *WebSocketHandler) readMessages(conn *websocket.Conn, ctx context.Context, send chan models.WebSocketMessage, cancel context.CancelFunc) {
 	defer cancel()
 
 	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
@@ -122,12 +126,12 @@ func (h *WebSocketHandler) readMessages(conn *websocket.Conn, send chan models.W
 		log.Printf("Received message: type=%s, action=%s, namespace=%s", message.Type, message.Action, message.Namespace)
 
 		// Handle client messages
-		h.handleClientMessage(message, send)
+		h.handleClientMessage(message, send, ctx)
 	}
 }
 
 // handleClientMessage handles messages received from the client
-func (h *WebSocketHandler) handleClientMessage(message models.WebSocketMessage, send chan models.WebSocketMessage) {
+func (h *WebSocketHandler) handleClientMessage(message models.WebSocketMessage, send chan models.WebSocketMessage, ctx context.Context) {
 	switch message.Action {
 	case "subscribe_pods":
 		// Client wants to subscribe to pod updates
@@ -141,7 +145,6 @@ func (h *WebSocketHandler) handleClientMessage(message models.WebSocketMessage, 
 
 	case "get_metrics":
 		// Client requests current metrics
-		ctx := context.Background()
 		metrics, err := h.k8sClient.GetClusterMetrics(ctx)
 		if err != nil {
 			log.Printf("Error getting metrics: %v", err)

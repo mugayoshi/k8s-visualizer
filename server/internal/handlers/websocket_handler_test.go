@@ -64,8 +64,7 @@ func TestHandleClientMessage_GetMetrics_FailureDoesNotPanic(t *testing.T) {
 	h := &WebSocketHandler{k8sClient: &failingK8s{}}
 	send := make(chan models.WebSocketMessage, 1)
 
-	// Should not panic or send any message
-	h.handleClientMessage(models.WebSocketMessage{Action: "get_metrics"}, send)
+	h.handleClientMessage(models.WebSocketMessage{Action: "get_metrics"}, send, context.Background())
 
 	select {
 	case msg := <-send:
@@ -79,7 +78,7 @@ func TestHandleClientMessage_GetMetrics_SuccessSendsMetrics(t *testing.T) {
 	h := &WebSocketHandler{k8sClient: &successK8s{}}
 	send := make(chan models.WebSocketMessage, 1)
 
-	h.handleClientMessage(models.WebSocketMessage{Action: "get_metrics"}, send)
+	h.handleClientMessage(models.WebSocketMessage{Action: "get_metrics"}, send, context.Background())
 
 	select {
 	case msg := <-send:

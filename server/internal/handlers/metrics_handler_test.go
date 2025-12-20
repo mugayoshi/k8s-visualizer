@@ -29,7 +29,7 @@ func TestMetricsEndpoint_K8sClientFails_Returns500(t *testing.T) {
 
 	// Register the same handler shape as in main.go but using our mock
 	r.GET("/api/metrics", func(c *gin.Context) {
-		ctx := context.Background()
+		ctx := c.Request.Context()
 		metrics, err := mock.GetClusterMetrics(ctx)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

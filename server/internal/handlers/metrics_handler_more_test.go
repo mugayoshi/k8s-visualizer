@@ -31,7 +31,7 @@ func TestMetricsEndpoint_Success_Returns200AndBody(t *testing.T) {
 	mock := &successMetricsClient{}
 
 	r.GET("/api/metrics", func(c *gin.Context) {
-		ctx := context.Background()
+		ctx := c.Request.Context()
 		metrics, err := mock.GetClusterMetrics(ctx)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

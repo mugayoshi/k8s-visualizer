@@ -2,7 +2,7 @@
 package handlers
 
 import (
-	"context"
+
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +19,7 @@ func NewDeploymentHandler(k8sClient services.K8sClientInterface) *DeploymentHand
 }
 
 func (h *DeploymentHandler) ListDeployments(c *gin.Context) {
-	ctx := context.Background()
+	ctx := c.Request.Context()
 	namespace := c.DefaultQuery("namespace", "default")
 	clientset := h.k8sClient.GetClientset()
 
